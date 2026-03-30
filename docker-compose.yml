@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+
+  # ── 開発用コンテナ ────────────────────────────────────────────
+  # VS Code がアタッチするコンテナ
+  # 全サーバのソースコードを /workspace にマウントして扱う
+  dev:
+    build:
+      context: .devcontainer
+      dockerfile: Dockerfile
+      args:
+        # WSL 側のユーザー ID を渡してファイル権限を揃える
+        USER_UID: ${UID:-1000}
+        USER_GID: ${GID:-1000}
+    volumes:
+      - ..:/workspace                      # ソースコード全体
+      - maven-cache:/home/vscode/.m2       # Maven キャッシュ（再ダウンロード防止）
+      - webapps-a:/deploy/server-a         # WAR デプロイ用（server-a と共有）
+      - webapps-b:/deploy/server-b         # WAR デプロイ用（server-b と共有）
+      - webapps-c:/deploy/server-c         # WAR デプロイ用（server-c と共有）
+    networks:
+      - app-network
+    depends_on:
+      server-a:
+        condition: service_healthy
+      server-b:
+        condition: service_healthy
+      server-c:
+        condition: service_healthy
+    tty: true                              # コンテナを起動し続ける
+
+  # ── server-a ─────────────────────────────────────────────────
+  # チームAがメインで担当するサーバ
+  server-a:
+    image: tomcat:10-jdk21
+    volumes:
+      - webapps-a:/usr/local/tomcat/webapps               # dev と共有（WARの自動反映）
+      - ./server-a/tomcat/conf:/usr/local/tomcat/conf      # Tomcat 設定（server.xml 等）
+    networks:
+      - app-network
+    ports:
+      - "8080:8080"                        # Windows ブラウザからのアクセス用
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s                    # Tomcat 起動の猶予時間
+
+  # ── server-b ─────────────────────────────────────────────────
+  # チームBがメインで担当するサーバ
+  server-b:
+    image: tomcat:10-jdk21
+    volumes:
+      - webapps-b:/usr/local/tomcat/webapps
+      - ./server-b/tomcat/conf:/usr/local/tomcat/conf
+    networks:
+      - app-network
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── server-c ─────────────────────────────────────────────────
+  # チームCがメインで担当するサーバ
+  server-c:
+    image: tomcat:10-jdk21
+    volumes:
+      - webapps-c:/usr/local/tomcat/webapps
+      - ./server-c/tomcat/conf:/usr/local/tomcat/conf
+    networks:
+      - app-network
+    ports:
+      - "8082:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+# ── ネットワーク ──────────────────────────────────────────────
+# 同一ネットワーク内ではサービス名（server-a 等）でアクセスできる
+# 例：http://server-a:8080/myapp
+networks:
+  app-network:
+    driver: bridge
+
+# ── ボリューム ────────────────────────────────────────────────
+volumes:
+  maven-cache:    # Maven の依存関係キャッシュ（コンテナを再作成しても保持）
+  webapps-a:      # server-a への WAR デプロイ用
+  webapps-b:      # server-b への WAR デプロイ用
+  webapps-c:      # server-c への WAR デプロイ用

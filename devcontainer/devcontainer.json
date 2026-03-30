@@ -1,0 +1,52 @@
+{
+  "name": "Spring Dev",
+
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+
+  "postCreateCommand": "mvn dependency:resolve",
+
+  "customizations": {
+    "vscode": {
+
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot",
+        "redhat.java",
+        // "vscjava.vscode-maven",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ],
+
+      "settings": {
+        "java.jdt.ls.java.home": "/opt/java/openjdk",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "java.compile.nullAnalysis.mode": "automatic",
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [8080, 8081, 8082],
+  "portsAttributes": {
+    "8080": { "label": "server-a", "onAutoForward": "notify" },
+    "8081": { "label": "server-b", "onAutoForward": "notify" },
+    "8082": { "label": "server-c", "onAutoForward": "notify" }
+  },
+
+  "remoteUser": "vscode",
+
+  "remoteEnv": {
+    "MAVEN_OPTS": "-Xmx1024m"
+  },
+
+  "shutdownAction": "stopCompose"
+}
