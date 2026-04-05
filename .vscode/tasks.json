@@ -1,0 +1,70 @@
+// ===================================================
+// WIP
+// ===================================================
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ===================================================
+    // Build: WAR を作成
+    // ===================================================
+    {
+      "label": "build",
+      "detail": "mvn clean package で WAR ファイルを生成します",
+      "type": "shell",
+      "command": "mvn clean package -DskipTests",
+      "options": {
+        // pom.xml があるプロジェクトルートで実行
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true // Ctrl+Shift+B に割り当て
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": "$maven"
+    },
+    // ===================================================
+    // Deploy: WAR を Tomcat の webapps/ にコピー
+    // ===================================================
+    {
+      "label": "deploy",
+      "detail": "ビルド済みの WAR を Tomcat の webapps/ にコピーします",
+      "type": "shell",
+      // TOMCAT_HOME が未設定の場合は /opt/tomcat にフォールバック
+      "command": "cp target/echo-server.war /deploy/product-a",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Build & Deploy
+    // ===================================================
+    {
+      "label": "build & deploy",
+      "detail": "ビルドしてそのまま Tomcat にデプロイします",
+      "dependsOrder": "sequence", // build が終わってから deploy を実行
+      "dependsOn": [
+        "build",
+        "deploy"
+      ],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

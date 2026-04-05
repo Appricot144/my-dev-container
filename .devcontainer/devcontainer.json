@@ -1,36 +1,46 @@
 {
-  "name": "Charlotte Dev",
-
+  "name": "dev-container",
   "dockerComposeFile": "../docker-compose.yml",
-
   // VS Code がアタッチするサービス
   "service": "dev",
   "workspaceFolder": "/workspace",
-
-  // コンテナ初回作成時に全サーバの依存関係を一括ダウンロード
-  "postCreateCommand": "cd /workspace/server-a && mvn dependency:resolve && cd /workspace/server-b && mvn dependency:resolve && cd /workspace/server-c && mvn dependency:resolve",
-
-  // VS Code の設定
+  // 実行させたいものがあれば追加
+  "initializeCommand": "echo DEV: initialize completed",
+  "postCreateCommand": "echo DEV: created",
+  "onCreateCommand": "echo DEV: started",
+  "postAttachCommand": "echo DEV: attached",
+  "postStartCommand": "echo DEV: started",
+  // 起動時はdevとproxyのみを起動する
+  "runServices": [
+    "dev",
+    "proxy"
+  ],
   "customizations": {
     "vscode": {
-
-      // いい感じに追加してください
       "extensions": [
-        "vscjava.vscode-java-pack",       // Java 補完・デバッグ
-        "vmware.vscode-spring-boot",      // Spring Boot サポート
-        "redhat.java",                    // Language Server
-        "vscjava.vscode-maven",           // Maven GUI
+        "redhat.java",
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot",
+        "vscjava.vscode-maven",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
         "bradlc.vscode-tailwindcss"
       ],
-
-      // JAVA HOME は仮置き
+      // TODO: javastyle.style を反映する
       "settings": {
-        "java.jdt.ls.java.home": "/opt/java/oracleJDk",
         "editor.formatOnSave": true,
         "editor.tabSize": 2,
         "java.compile.nullAnalysis.mode": "automatic",
+        "java.jdt.ls.java.home": "/usr/lib/jvm/jdk-21-oracle-x64",
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-21",
+            "path": "/usr/lib/jvm/jdk-21-oracle-x64",
+            "default": true
+          }
+        ],
         "[typescript]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
@@ -40,23 +50,20 @@
       }
     }
   },
-
-  // ポートフォワード：コンテナのポートを Windows 側に転送
-  // VS Code の PORTS タブからブラウザで開ける
-  "forwardPorts": [8080, 8081, 8082],
-  "portsAttributes": {
-    "8080": { "label": "server-a", "onAutoForward": "notify" },
-    "8081": { "label": "server-b", "onAutoForward": "notify" },
-    "8082": { "label": "server-c", "onAutoForward": "notify" }
-  },
-
-  "remoteUser": "vscode",
-
-  // とりあえず 1GB
+  "remoteUser": "${localEnv:USERNAME}",
+  // TODO: 他に設定しているMAVENオプションがないか調べる
   "remoteEnv": {
     "MAVEN_OPTS": "-Xmx1024m"
   },
-
-  // VS Code 終了時の挙動
+  // コンテナからwindowsへ8080ポートを転送
+  "forwardPorts": [
+    8080
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "proxy",
+      "onAutoForward": "notify"
+    }
+  },
   "shutdownAction": "stopCompose"
 }

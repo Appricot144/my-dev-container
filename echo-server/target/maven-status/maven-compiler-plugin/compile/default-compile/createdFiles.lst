@@ -1,0 +1,5 @@
+com/example/echo/config/WebConfig.class
+com/example/echo/db/DbHealthChecker.class
+com/example/echo/controller/EchoController.class
+com/example/echo/config/AppConfig.class
+com/example/echo/db/DbHealthChecker$DbStatus.class
