@@ -13,11 +13,9 @@ ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir -p /etc/sudoers.d \
-    && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" \
-       >> /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME 
+# volumeの権限の書き換えのため (entry.sh)
+ENV ENV CONTAINER_USER=$USERNAME
 
 # ── locale ────────────────────────────────────────────────────
 # ロケールを合わせたければアンコメントして使用
@@ -40,7 +38,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     maven \
     git \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    zsh \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && chsh -s /bin/zsh $USERNAME
 
 # ── oracle jdk ────────────────────────────────────────────
 RUN wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.deb \
@@ -52,7 +52,7 @@ RUN wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.deb \
     && rm -rf /var/lib/apt/lists/*
 
 ENV JAVA_HOME=/usr/lib/jvm/jdk-21-oracle-x64 \
-    PATH=$JAVA_HOME/bin:$PATH
+    PATH=$JAVA_HOME/bin:$PATH 
 
 # ── Node.js 21 ────────────────────────────────────────────────
 RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
@@ -63,20 +63,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
 RUN npm install -g pnpm
 
 # ── Maven Cache Directory ────────────────────────────
-# maven-cache ボリュームのマウント先
+# maven-cache ボリュームのマウント先.
 RUN mkdir -p /home/$USERNAME/.m2 \
-    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.m2
-
-# ── install global node packages ────────────────────────────
-# RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
 
 # ── 共通 jar ──────────────────────────────────────────────────
 # 更新頻度が低いのでイメージに焼き込む
 # 更新時は `docker compose up --build` で再ビルドする
 #
 # プロジェクトルートの lib/common/ に jar を配置
-
-# 更新するときは`docker cp path/to/file.jar`
 
 # COPY lib/common/ /opt/common-lib/
 
@@ -94,6 +88,9 @@ RUN mkdir -p /home/$USERNAME/.m2 \
 #     else \
 #       echo "service common jar not found. skiped."; \
 #     fi
+
+COPY .devcontainer/entry.sh /usr/local/bin/entry.sh
+RUN chmod +x /usr/local/bin/entry.sh
 
 USER $USERNAME
 WORKDIR /workspace

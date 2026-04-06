@@ -1,5 +1,4 @@
 services:
-
   # ── 開発用コンテナ ────────────────────────────────────────────
   dev:
     build:
@@ -10,9 +9,10 @@ services:
         USER_UID: ${UID:-1000}
         USER_GID: ${GID:-1000}
         USERNAME: ${USERNAME:-vscode}
+    entrypoint: ["/usr/local/bin/entry.sh"]
     volumes:
-      - ./:/workspace                        # プロジェクトルートをコンテナの/workspaceに展開
-      - maven-cache:/home/${USERNAME:-vscode}/.m2         # Maven キャッシュ
+      - ./:/workspace # プロジェクトルートをコンテナの/workspaceに展開
+      - maven-cache:/home/${USERNAME:-vscode}/.m2 # Maven キャッシュ
       # WAR デプロイ用ボリューム
       - webapps-a1:/deploy/product-a/server1
       # - webapps-a2:/deploy/product-a/server2
@@ -22,10 +22,9 @@ services:
       # - webapps-c2:/deploy/product-c/server2
     networks:
       - app-network
-    tty: true                                # コンテナを起動し続ける
 
   # ── Apache リバースプロキシ用 ─────────────────────────────────
-  # Apache コンテナ は dev container と一緒に起動 
+  # Apache コンテナ は dev container と一緒に起動
   proxy:
     image: httpd:2.4
     volumes:
@@ -41,14 +40,18 @@ services:
   # ════════════════════════════════════════════════════════════
   product-a-1:
     build:
-      context: .                          # lib/common/ を参照するためルートを指定
+      context: . # lib/common/ を参照するためルートを指定
       dockerfile: .docker/product-a/server-1/Dockerfile
+      args:
+        USER_UID: ${UID:-1000}
+        USER_GID: ${GID:-1000}
+    user: "${UID:-1000}:${GID:-1000}"
     environment:
-      - CATALINA_OPTS=-Xmx512m            # サーバごとに調整
+      - CATALINA_OPTS=-Xmx512m # サーバごとに調整
     profiles: ["product-a"]
     volumes:
-      - webapps-a1:/opt/tomcat/webapps              # dev と共有（WAR の自動反映）
-      - ./product-a/server1/conf:/opt/tomcat/conf   # server.xml 等（差分はここで吸収）
+      - webapps-a1:/opt/tomcat/webapps # dev と共有（WAR の自動反映）
+      - ./product-a/server1/conf:/opt/tomcat/conf # server.xml 等（差分はここで吸収）
     networks:
       - app-network
     healthcheck:
@@ -56,7 +59,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s                   # サーバ起動にかかる時間がまちまちなので、ここも調整ポイント
+      start_period: 30s # サーバ起動にかかる時間がまちまちなので、ここも調整ポイント
 
   # product-a-2:
   #   build:
@@ -160,8 +163,8 @@ networks:
 
 # ── ボリューム ────────────────────────────────────────────────
 volumes:
-  maven-cache:    # Maven の依存関係キャッシュ
-  webapps-a1:     # 製品A server1 への WAR デプロイ用
+  maven-cache: # Maven の依存関係キャッシュ
+  webapps-a1: # 製品A server1 への WAR デプロイ用
   # webapps-a2:     # 製品A server2 への WAR デプロイ用
   # webapps-b1:     # 製品B server1 への WAR デプロイ用
   # webapps-b2:     # 製品B server2 への WAR デプロイ用

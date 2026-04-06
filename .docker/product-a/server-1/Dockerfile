@@ -6,6 +6,9 @@
 # ────────────────────────────────────────────────────────────
 FROM debian:12-slim
 
+ARG USER_UID=1000
+ARG USER_GID=1000
+
 # ── Commands ────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
     wget \
@@ -35,6 +38,9 @@ RUN curl -fsSL \
 
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$CATALINA_HOME/bin:$PATH
+
+# Tomcat のディレクトリを指定 UID で所有させる
+RUN chown -R $USER_UID:$USER_GID /opt/tomcat
 
 # ── 共通 jar ──────────────────────────────────────────────────
 # 全サーバで共通して使う jar をイメージに焼き込む

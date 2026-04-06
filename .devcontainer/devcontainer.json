@@ -6,7 +6,7 @@
   "workspaceFolder": "/workspace",
   // 実行させたいものがあれば追加
   "initializeCommand": "echo DEV: initialize completed",
-  "postCreateCommand": "echo DEV: created",
+  "postCreateCommand": "echo DEV: container created",
   "onCreateCommand": "echo DEV: started",
   "postAttachCommand": "echo DEV: attached",
   "postStartCommand": "echo DEV: started",
@@ -30,6 +30,15 @@
       ],
       // TODO: javastyle.style を反映する
       "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.osx": {
+          "zsh": {
+            "path": "/bin/zsh",
+            "args": [
+              "-l"
+            ]
+          }
+        },
         "editor.formatOnSave": true,
         "editor.tabSize": 2,
         "java.compile.nullAnalysis.mode": "automatic",
