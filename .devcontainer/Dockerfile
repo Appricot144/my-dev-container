@@ -63,7 +63,7 @@ RUN npm install -g pnpm
 # ── Volume Directory ────────────────────────────
 # deploy volume を追加する場合は、ここに追加
 RUN mkdir -p /home/$USERNAME/.m2 \
-    && mkdir -p /deploy/product-a/server-1/ \
+    && mkdir -p /deploy/product-a/server1/ \
     && chown -R $USERNAME:$USERNAME /deploy \
     && chown -R $USERNAME:$USERNAME /home/$USERNAME/.m2
 
