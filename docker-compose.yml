@@ -9,6 +9,7 @@ services:
         USER_UID: ${UID:-1000}
         USER_GID: ${GID:-1000}
         USERNAME: ${USERNAME:-vscode}
+    user: "${UID:-1000}:${GID:-1000}"
     entrypoint: ["/usr/local/bin/entry.sh"]
     volumes:
       - ./:/workspace # プロジェクトルートをコンテナの/workspaceに展開

@@ -14,8 +14,6 @@ ARG USER_UID=1000
 ARG USER_GID=1000
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME 
-# volumeの権限の書き換えのため (entry.sh)
-ENV ENV CONTAINER_USER=$USERNAME
 
 # ── locale ────────────────────────────────────────────────────
 # ロケールを合わせたければアンコメントして使用
@@ -62,9 +60,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
 # pnpm 
 RUN npm install -g pnpm
 
-# ── Maven Cache Directory ────────────────────────────
-# maven-cache ボリュームのマウント先.
+# ── Volume Directory ────────────────────────────
+# deploy volume を追加する場合は、ここに追加
 RUN mkdir -p /home/$USERNAME/.m2 \
+    && mkdir -p /deploy/product-a/server-1/ \
+    && chown -R $USERNAME:$USERNAME /deploy \
+    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.m2
 
 # ── 共通 jar ──────────────────────────────────────────────────
 # 更新頻度が低いのでイメージに焼き込む
@@ -89,8 +90,9 @@ RUN mkdir -p /home/$USERNAME/.m2 \
 #       echo "service common jar not found. skiped."; \
 #     fi
 
-COPY .devcontainer/entry.sh /usr/local/bin/entry.sh
-RUN chmod +x /usr/local/bin/entry.sh
+COPY entry.sh /usr/local/bin/entry.sh
+RUN chmod a+x /usr/local/bin/entry.sh \
+    && chown $USERNAME /usr/local/bin/entry.sh
 
 USER $USERNAME
 WORKDIR /workspace
