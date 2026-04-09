@@ -14,6 +14,7 @@ services:
     volumes:
       - ./:/workspace # プロジェクトルートをコンテナの/workspaceに展開
       - maven-cache:/home/${USERNAME:-vscode}/.m2 # Maven キャッシュ
+      - /var/run/docker.sock:/var/run/docker.sock
       # WAR デプロイ用ボリューム
       - webapps-a1:/deploy/product-a/server1
       # - webapps-a2:/deploy/product-a/server2

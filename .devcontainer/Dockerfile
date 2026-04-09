@@ -16,19 +16,18 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME 
 
 # ── locale ────────────────────────────────────────────────────
-# ロケールを合わせたければアンコメントして使用
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     locales \
-#     language-pack-ja \
-#     tzdata \
-#     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-#     && locale-gen ja_JP.UTF-8 \
-#     && update-locale LANG=ja_JP.UTF-8 \
-#     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    locales \
+    tzdata \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && sed -i -e 's/# \(ja_JP.UTF-8\)/\1/' /etc/locale.gen \
+    && locale-gen ja_JP.UTF-8 \
+    && update-locale LANG=ja_JP.UTF-8 \
+    && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-# ENV LANG=ja_JP.UTF-8 \
-#     LC_ALL=ja_JP.UTF-8 \
-#     TZ=Asia/Tokyo
+ENV LANG=ja_JP.UTF-8 \
+    LC_ALL=ja_JP.UTF-8 \
+    TZ=Asia/Tokyo
 
 # ── Commands ────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \

@@ -59,6 +59,10 @@
       }
     }
   },
+  // features 他に追加したいものがあれば追加
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.9.1": {}
+  },
   "remoteUser": "${localEnv:USERNAME}",
   // TODO: 他に設定しているMAVENオプションがないか調べる
   "remoteEnv": {
