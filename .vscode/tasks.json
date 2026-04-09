@@ -1,5 +1,5 @@
 // ===================================================
-// WIP
+// WIP: 動確　build:deploy
 // ===================================================
 {
   "version": "2.0.0",
@@ -65,6 +65,186 @@
         "clear": true
       },
       "problemMatcher": []
+    },
+    // ===================================================
+    // Test: テストを実行
+    // ===================================================
+    {
+      "label": "test",
+      "detail": "mvn test でテストを実行します",
+      "type": "shell",
+      "command": "mvn test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": "$maven"
+    },
+    // ===================================================
+    // Tomcat: ログを流す TODO:inputs で選択
+    // ===================================================
+    {
+      "label": "tomcat:log",
+      "detail": "product-a-1 のログをリアルタイムで表示します",
+      "type": "shell",
+      "command": "docker compose logs -f product-a-1",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Docker: profile単位で起動
+    // ===================================================
+    {
+      "label": "docker:up:profile",
+      "detail": "指定したprofileのコンテナを起動します",
+      "type": "shell",
+      "command": "docker compose --profile ${input:profile} up -d",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Docker: コンテナ単体で起動
+    // ===================================================
+    {
+      "label": "docker:up:container",
+      "detail": "指定したコンテナを単体で起動します",
+      "type": "shell",
+      "command": "docker compose up -d ${input:container}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Docker: profile単位で停止
+    // ===================================================
+    {
+      "label": "docker:down:profile",
+      "detail": "指定したprofileのコンテナを停止します",
+      "type": "shell",
+      "command": "docker compose --profile ${input:profile} down",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Docker: コンテナ単体で停止
+    // ===================================================
+    {
+      "label": "docker:down:container",
+      "detail": "指定したコンテナを単体で停止します",
+      "type": "shell",
+      "command": "docker compose stop ${input:container}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Docker: profile単位で再ビルド
+    // ===================================================
+    {
+      "label": "docker:rebuild:profile",
+      "detail": "指定したprofileのイメージを再ビルドして起動します",
+      "type": "shell",
+      "command": "docker compose --profile ${input:profile} up -d --build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Docker: コンテナ単体で再ビルド
+    // ===================================================
+    {
+      "label": "docker:rebuild:container",
+      "detail": "指定したコンテナを再ビルドして起動します",
+      "type": "shell",
+      "command": "docker compose up -d --build ${input:container}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "profile",
+      "type": "pickString",
+      "description": "起動するprofileを選択してください",
+      "options": [
+        "product-a",
+        "product-b",
+        "product-c"
+      ]
+    },
+    {
+      "id": "container",
+      "type": "pickString",
+      "description": "起動するコンテナを選択してください",
+      "options": [
+        "product-a-1",
+        "product-a-2",
+        "product-b-1",
+        "product-b-2",
+        "product-c-1",
+        "product-c-2"
+      ]
     }
   ]
 }
