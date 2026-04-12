@@ -9,12 +9,12 @@ services:
         USER_UID: ${UID:-1000}
         USER_GID: ${GID:-1000}
         USERNAME: ${USERNAME:-vscode}
+        DOCKER_GID: ${DOCKER_GID:-997}
     user: "${UID:-1000}:${GID:-1000}"
     entrypoint: ["/usr/local/bin/entry.sh"]
     volumes:
       - ./:/workspace # プロジェクトルートをコンテナの/workspaceに展開
       - maven-cache:/home/${USERNAME:-vscode}/.m2 # Maven キャッシュ
-      - /var/run/docker.sock:/var/run/docker.sock
       # WAR デプロイ用ボリューム
       - webapps-a1:/deploy/product-a/server1
       # - webapps-a2:/deploy/product-a/server2

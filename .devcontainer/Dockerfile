@@ -8,12 +8,16 @@
 FROM debian:12-slim
 
 # ── User ───────────────────────────────────────────
-# docker-compose.yml の build.args から渡す (default: uid=1000, gid=1000, username=vscode)
+# docker-compose.yml の build.args から渡す 
+# container user (default: uid=1000, gid=1000, username=vscode)
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=1000
+ARG DOCKER_GID=997
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME 
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && groupadd --gid $DOCKER_GID docker \
+    && usermod -aG docker $USERNAME
 
 # ── locale ────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -36,6 +40,8 @@ RUN apt-get update && apt-get install -y \
     maven \
     git \
     zsh \
+    sudo \
+    && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && chsh -s /bin/zsh $USERNAME
 

@@ -4,17 +4,18 @@
   // VS Code がアタッチするサービス
   "service": "dev",
   "workspaceFolder": "/workspace",
-  // 実行させたいものがあれば追加
+  // -- user settings -----------------------------------
   "initializeCommand": "echo DEV: initialize completed",
   "postCreateCommand": "echo DEV: container created",
   "onCreateCommand": "echo DEV: started",
-  "postAttachCommand": "echo DEV: attached",
+  // DooDで作成されたdockerグループを起動時のシェルに反映
+  "postAttachCommand": "newgrp docker",
   "postStartCommand": "echo DEV: started",
-  // 起動時はdevとproxyのみを起動する
   "runServices": [
     "dev",
     "proxy"
   ],
+  // ----------------------------------------------------
   "customizations": {
     "vscode": {
       "extensions": [
