@@ -8,8 +8,7 @@
   "initializeCommand": "echo DEV: initialize completed",
   "postCreateCommand": "echo DEV: container created",
   "onCreateCommand": "echo DEV: started",
-  // DooDで作成されたdockerグループを起動時のシェルに反映
-  "postAttachCommand": "newgrp docker",
+  "postAttachCommand": "echo DEV: attached",
   "postStartCommand": "echo DEV: started",
   "runServices": [
     "dev",

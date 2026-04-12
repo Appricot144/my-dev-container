@@ -34,19 +34,11 @@ ARG TOMCAT_VERSION=10.1.54
 RUN curl -fsSL \
     https://archive.apache.org/dist/tomcat/tomcat-10/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
     | tar -xz -C /opt \
-    && mv /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat
+    && mv /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat \
+    && chown -R $USER_UID:$USER_UID /opt/tomcat
 
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$CATALINA_HOME/bin:$PATH
-
-# Tomcat のディレクトリを指定 UID で所有させる
-RUN chown -R $USER_UID:$USER_GID /opt/tomcat
-
-# ── 共通 jar ──────────────────────────────────────────────────
-# 全サーバで共通して使う jar をイメージに焼き込む
-# 更新時は `docker compose up --build` で再ビルドする
-
-# COPY lib/common/ /opt/tomcat/lib/
 
 # ── デフォルト起動コマンド ────────────────────────────────────
 CMD ["catalina.sh", "run"]

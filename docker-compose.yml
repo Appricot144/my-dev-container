@@ -45,6 +45,7 @@ services:
       context: . # lib/common/ を参照するためルートを指定
       dockerfile: .docker/product-a/server-1/Dockerfile
       args:
+        USERNAME: ${USERNAME:-vscode}
         USER_UID: ${UID:-1000}
         USER_GID: ${GID:-1000}
     user: "${UID:-1000}:${GID:-1000}"

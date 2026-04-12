@@ -66,6 +66,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
 RUN npm install -g pnpm
 
 # ── Volume Directory ────────────────────────────
+# 事前にdeployディレクトリを作成
 # deploy volume を追加する場合は、ここに追加
 RUN mkdir -p /home/$USERNAME/.m2 \
     && mkdir -p /deploy/product-a/server1/ \

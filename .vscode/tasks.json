@@ -13,8 +13,7 @@
       "type": "shell",
       "command": "mvn clean package -DskipTests",
       "options": {
-        // pom.xml があるプロジェクトルートで実行
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/${input:project}"
       },
       "group": {
         "kind": "build",
@@ -28,14 +27,15 @@
       "problemMatcher": "$maven"
     },
     // ===================================================
-    // Deploy: WAR を Tomcat の webapps/ にコピー
+    // Deploy: WAR を Tomcat の webapps/ にコピー 
+    // TODO:inputs で選択
     // ===================================================
     {
       "label": "deploy",
       "detail": "ビルド済みの WAR を Tomcat の webapps/ にコピーします",
       "type": "shell",
       // TOMCAT_HOME が未設定の場合は /opt/tomcat にフォールバック
-      "command": "cp target/echo-server.war /deploy/product-a",
+      "command": "cp ${workspaceFolder}/${input:project}/target/${input:project}.war /deploy/product-a",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -67,7 +67,7 @@
       "problemMatcher": []
     },
     // ===================================================
-    // Test: テストを実行
+    // Test: テストを実行 TODO:inputs で選択
     // ===================================================
     {
       "label": "test",
@@ -239,6 +239,19 @@
       "description": "起動するコンテナを選択してください",
       "options": [
         "product-a-1",
+        "product-a-2",
+        "product-b-1",
+        "product-b-2",
+        "product-c-1",
+        "product-c-2"
+      ]
+    },
+    {
+      "id": "project",
+      "type": "pickString",
+      "description": "プロジェクトを選択してください",
+      "options": [
+        "echo-server",
         "product-a-2",
         "product-b-1",
         "product-b-2",
