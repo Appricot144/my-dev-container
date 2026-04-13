@@ -55,9 +55,6 @@
                      ・reloadable : クラス変更を自動検知して再読込するか
                                    開発中は true が便利だが、本番では false にする
                      ============================================================ -->
-                <Context path="/echo-server"
-                         docBase="echo-server"
-                         reloadable="true" />
  
                 <!-- ============================================================
                      AccessLogValve
