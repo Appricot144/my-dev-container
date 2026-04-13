@@ -28,14 +28,13 @@
     },
     // ===================================================
     // Deploy: WAR を Tomcat の webapps/ にコピー 
-    // TODO:inputs で選択
     // ===================================================
     {
       "label": "deploy",
       "detail": "ビルド済みの WAR を Tomcat の webapps/ にコピーします",
       "type": "shell",
       // TOMCAT_HOME が未設定の場合は /opt/tomcat にフォールバック
-      "command": "cp ${workspaceFolder}/${input:project}/target/${input:project}.war /deploy/product-a",
+      "command": "cp ${workspaceFolder}/${input:project}/target/${input:project}.war ${workspaceFolder}/deploy/product-a/server1/",
       "options": {
         "cwd": "${workspaceFolder}"
       },
