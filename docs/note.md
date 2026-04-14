@@ -59,8 +59,6 @@ docker-compose.yml の環境変数で差分を吸収
 
 ## devcontainer.json の設定項目
 
-- [ ] 追加がないか検討
-
 ### extentions
 
 - prettier
@@ -78,3 +76,10 @@ docker-compose.yml の環境変数で差分を吸収
 ### features
 
 - docker-outside-of-docker
+
+## 懸念点
+
+- メモリの消費
+- ビルド、サーバの起動、にかかる時間
+- vscode tasks の充実
+- コンテナの管理
