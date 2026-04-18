@@ -1,2 +1,9 @@
 *~
 *.org
+
+# claude
+.claude/
+
+# server
+Echo-RestAPI/
+Echo-Web/

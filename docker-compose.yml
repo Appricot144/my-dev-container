@@ -2,8 +2,8 @@ services:
   # ── 開発用コンテナ ────────────────────────────────────────────
   dev:
     build:
-      context: .devcontainer
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: .devcontainer/Dockerfile
       args:
         # WSL 側のユーザー ID を渡してファイル権限を揃える
         USER_UID: ${UID:-1000}
@@ -11,39 +11,30 @@ services:
         USERNAME: ${USERNAME:-vscode}
         DOCKER_GID: ${DOCKER_GID:-997}
     user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      - DB_SCHEMA="${DB_SCHEMA:-TEST_SCHEMA}"
     entrypoint: ["/usr/local/bin/entry.sh"]
     volumes:
-      - ./:/workspace # プロジェクトルートをコンテナの/workspaceに展開
-      - maven-cache:/home/${USERNAME:-vscode}/.m2 # Maven キャッシュ
-      # WAR デプロイ用ボリューム
-      - webapps-a1:/deploy/product-a/server1
-      # - webapps-a2:/deploy/product-a/server2
-      # - webapps-b1:/deploy/product-b/server1
-      # - webapps-b2:/deploy/product-b/server2
-      # - webapps-c1:/deploy/product-c/server1
-      # - webapps-c2:/deploy/product-c/server2
-    networks:
-      - app-network
-
-  # ── Apache リバースプロキシ用 ─────────────────────────────────
-  # Apache コンテナ は dev container と一緒に起動
-  proxy:
-    image: httpd:2.4
-    volumes:
-      - ./.docker/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
-    ports:
-      - "8080:8080"
+      - ./:/workspace
+      - maven-cache:/home/${USERNAME:-vscode}/.m2
+      # war deploy volumes
+      - echo-restapi-dv:/deploy/echo/rest-api
+      - echo-web-dv:/deploy/echo/web
+      - message-web-dv:/deploy/message/web
+      # source volumes (other projects)
+      - ../dev-env:/dev-env:ro
+      - ../Message:/Message:ro
     networks:
       - app-network
 
   # ════════════════════════════════════════════════════════════
-  # 製品A のサーバ群
-  # profile: product-a
+  # echo-server のサーバ群
+  # profile: echo
   # ════════════════════════════════════════════════════════════
-  product-a-1:
+  echo-restapi:
     build:
-      context: . # lib/common/ を参照するためルートを指定
-      dockerfile: .docker/product-a/server-1/Dockerfile
+      context: .
+      dockerfile: ../dev-env/server-base/Dockerfile
       args:
         USERNAME: ${USERNAME:-vscode}
         USER_UID: ${UID:-1000}
@@ -51,10 +42,10 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     environment:
       - CATALINA_OPTS=-Xmx512m # サーバごとに調整
-    profiles: ["product-a"]
+    profiles: ["echo"]
     volumes:
-      - webapps-a1:/opt/tomcat/webapps # dev と共有（WAR の自動反映）
-      - ./product-a/server1/conf:/opt/tomcat/conf # server.xml 等（差分はここで吸収）
+      - echo-restapi-dv:/opt/tomcat/webapps # war deploy volume
+      - ./conf:/opt/tomcat/conf # server conf (server.xml etc...)
     networks:
       - app-network
     healthcheck:
@@ -62,114 +53,60 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s # サーバ起動にかかる時間がまちまちなので、ここも調整ポイント
+      start_period: 30s
 
-  # product-a-2:
-  #   build:
-  #     context: .
-  #     dockerfile: .docker/server/Dockerfile
-  #   profiles: ["product-a"]
-  #   volumes:
-  #     - webapps-a2:/opt/tomcat/webapps
-  #     - ./product-a/server2/conf:/opt/tomcat/conf
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
+  echo-web:
+    build:
+      context: .
+      dockerfile: ../dev-env/server-base/Dockerfile
+    profiles: ["echo"]
+    volumes:
+      - echo-web-dv:/opt/tomcat/webapps
+      - ./conf:/opt/tomcat/conf
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  # # ════════════════════════════════════════════════════════════
-  # # 製品B のサーバ群
-  # # profile: product-b
-  # # ════════════════════════════════════════════════════════════
-  # product-b-1:
-  #   build:
-  #     context: .
-  #     dockerfile: .docker/server/Dockerfile
-  #   profiles: ["product-b"]
-  #   volumes:
-  #     - webapps-b1:/opt/tomcat/webapps
-  #     - ./product-b/server1/conf:/opt/tomcat/conf
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
-
-  # product-b-2:
-  #   build:
-  #     context: .
-  #     dockerfile: .docker/server/Dockerfile
-  #   profiles: ["product-b"]
-  #   volumes:
-  #     - webapps-b2:/opt/tomcat/webapps
-  #     - ./product-b/server2/conf:/opt/tomcat/conf
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
-
-  # # ════════════════════════════════════════════════════════════
-  # # 製品C のサーバ群
-  # # profile: product-c
-  # # ════════════════════════════════════════════════════════════
-  # product-c-1:
-  #   build:
-  #     context: .
-  #     dockerfile: .docker/server/Dockerfile
-  #   profiles: ["product-c"]
-  #   volumes:
-  #     - webapps-c1:/opt/tomcat/webapps
-  #     - ./product-c/server1/conf:/opt/tomcat/conf
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
-
-  # product-c-2:
-  #   build:
-  #     context: .
-  #     dockerfile: .docker/server/Dockerfile
-  #   profiles: ["product-c"]
-  #   volumes:
-  #     - webapps-c2:/opt/tomcat/webapps
-  #     - ./product-c/server2/conf:/opt/tomcat/conf
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
+  # ════════════════════════════════════════════════════════════
+  # message-server のサーバ群
+  # profile: message
+  # ════════════════════════════════════════════════════════════
+  message-web:
+    build:
+      context: .
+      dockerfile: ../dev-env/server-base/Dockerfile
+    profiles: ["message"]
+    volumes:
+      - message-web-dv:/opt/tomcat/webapps
+      - ../Message/Message-Web/conf:/opt/tomcat/conf
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 # ── ネットワーク ──────────────────────────────────────────────
-# 同一ネットワーク内ではサービス名でアクセスできる
-# 例：http://product-a-1:8080/myapp
 networks:
   app-network:
-    driver: bridge
+    external: true
 
 # ── ボリューム ────────────────────────────────────────────────
 volumes:
-  maven-cache: # Maven の依存関係キャッシュ
-  webapps-a1: # 製品A server1 への WAR デプロイ用
-  # webapps-a2:     # 製品A server2 への WAR デプロイ用
-  # webapps-b1:     # 製品B server1 への WAR デプロイ用
-  # webapps-b2:     # 製品B server2 への WAR デプロイ用
-  # webapps-c1:     # 製品C server1 への WAR デプロイ用
-  # webapps-c2:     # 製品C server2 への WAR デプロイ用
+  # Maven cache
+  maven-cache:
+    name: maven-cache
+  # war deploy volumes
+  echo-restapi-dv:
+    external: true
+  echo-web-dv:
+    external: true
+  message-web-dv:
+    external: true

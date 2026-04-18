@@ -1,8 +1,6 @@
 # ────────────────────────────────────────────────────────────
 # base image: debian bookworm slim 
 #  + oracle jdk 21 + tomcat 10.1.54 + etc ...
-# 
-# チーム内のプライベートレジストリができたら、そこから取得
 # ────────────────────────────────────────────────────────────
 
 FROM debian:12-slim
@@ -69,18 +67,15 @@ RUN npm install -g pnpm
 # 事前にdeployディレクトリを作成
 # deploy volume を追加する場合は、ここに追加
 RUN mkdir -p /home/$USERNAME/.m2 \
-    && mkdir -p /deploy/product-a/server1/ \
+    && mkdir -p /deploy/echo/{web,restapi} \
+    && mkdir -p /deploy/message/{web} \
     && chown -R $USERNAME:$USERNAME /deploy \
     && chown -R $USERNAME:$USERNAME /home/$USERNAME/.m2
 
 # ── 共通 jar ──────────────────────────────────────────────────
 # 更新頻度が低いのでイメージに焼き込む
 # 更新時は `docker compose up --build` で再ビルドする
-#
-# プロジェクトルートの lib/common/ に jar を配置
-
 # COPY lib/common/ /opt/common-lib/
-
 # RUN if [ "$(ls /opt/common-lib/*.jar 2>/dev/null)" ]; then \
 #       for jar in /opt/common-lib/*.jar; do \
 #         name=$(basename "$jar" .jar); \
@@ -96,7 +91,7 @@ RUN mkdir -p /home/$USERNAME/.m2 \
 #       echo "service common jar not found. skiped."; \
 #     fi
 
-COPY entry.sh /usr/local/bin/entry.sh
+COPY .devcontainer/entry.sh /usr/local/bin/entry.sh
 RUN chmod a+x /usr/local/bin/entry.sh \
     && chown $USERNAME /usr/local/bin/entry.sh
 

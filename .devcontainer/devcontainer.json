@@ -11,8 +11,7 @@
   "postAttachCommand": "echo DEV: attached",
   "postStartCommand": "echo DEV: started",
   "runServices": [
-    "dev",
-    "proxy"
+    "dev"
   ],
   // ----------------------------------------------------
   "customizations": {
@@ -28,7 +27,6 @@
         "mhutchie.git-graph",
         "bradlc.vscode-tailwindcss"
       ],
-      // TODO: javastyle.style を反映する
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
         "terminal.integrated.profiles.osx": {
@@ -59,12 +57,10 @@
       }
     }
   },
-  // features 他に追加したいものがあれば追加
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1.9.1": {}
   },
   "remoteUser": "${localEnv:USERNAME}",
-  // TODO: 他に設定しているMAVENオプションがないか調べる
   "remoteEnv": {
     "MAVEN_OPTS": "-Xmx1024m"
   },
