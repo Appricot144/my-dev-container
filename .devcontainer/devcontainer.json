@@ -64,9 +64,11 @@
   "remoteEnv": {
     "MAVEN_OPTS": "-Xmx1024m"
   },
-  // コンテナからwindowsへ8080ポートを転送
+  // コンテナからwindowsへポートを転送
   "forwardPorts": [
-    8080
+    8080,
+    5173,
+    3000
   ],
   "portsAttributes": {
     "8080": {

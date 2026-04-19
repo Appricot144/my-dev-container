@@ -14,6 +14,8 @@ services:
     environment:
       - DB_SCHEMA="${DB_SCHEMA:-TEST_SCHEMA}"
     entrypoint: ["/usr/local/bin/entry.sh"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./:${HOST_WORKSPACE}/${PROJECT}
       - maven-cache:/home/${USERNAME:-vscode}/.m2
