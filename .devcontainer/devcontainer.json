@@ -3,7 +3,7 @@
   "dockerComposeFile": "../docker-compose.yml",
   // VS Code がアタッチするサービス
   "service": "dev",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "${localWorkspaceFolder}",
   // -- user settings -----------------------------------
   "initializeCommand": "echo DEV: initialize completed",
   "postCreateCommand": "echo DEV: container created",

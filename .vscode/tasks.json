@@ -34,7 +34,7 @@
       "detail": "ビルド済みの WAR を Tomcat の webapps/ にコピーします",
       "type": "shell",
       // TOMCAT_HOME が未設定の場合は /opt/tomcat にフォールバック
-      "command": "cp ${workspaceFolder}/${input:project}/target/${input:project}.war ${workspaceFolder}/deploy/product-a/server1/",
+      "command": "cp ${workspaceFolder}/${input:project}/target/${input:project}.war ${workspaceFolder}/deploy/echo/restapi/",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -227,9 +227,8 @@
       "type": "pickString",
       "description": "起動するprofileを選択してください",
       "options": [
-        "product-a",
-        "product-b",
-        "product-c"
+        "echo",
+        "message"
       ]
     },
     {
@@ -237,12 +236,9 @@
       "type": "pickString",
       "description": "起動するコンテナを選択してください",
       "options": [
-        "product-a-1",
-        "product-a-2",
-        "product-b-1",
-        "product-b-2",
-        "product-c-1",
-        "product-c-2"
+        "echo-restapi",
+        "echo-web",
+        "message-web"
       ]
     },
     {
@@ -250,12 +246,9 @@
       "type": "pickString",
       "description": "プロジェクトを選択してください",
       "options": [
-        "echo-server",
-        "product-a-2",
-        "product-b-1",
-        "product-b-2",
-        "product-c-1",
-        "product-c-2"
+        "Echo-RestAPI",
+        "Echo-Web",
+        "Message-Web"
       ]
     }
   ]

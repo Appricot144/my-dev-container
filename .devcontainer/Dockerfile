@@ -67,8 +67,9 @@ RUN npm install -g pnpm
 # 事前にdeployディレクトリを作成
 # deploy volume を追加する場合は、ここに追加
 RUN mkdir -p /home/$USERNAME/.m2 \
-    && mkdir -p /deploy/echo/{web,restapi} \
-    && mkdir -p /deploy/message/{web} \
+    && mkdir -p /deploy/echo/web \
+    && mkdir -p /deploy/echo/rest-api \
+    && mkdir -p /deploy/message/web \
     && chown -R $USERNAME:$USERNAME /deploy \
     && chown -R $USERNAME:$USERNAME /home/$USERNAME/.m2
 

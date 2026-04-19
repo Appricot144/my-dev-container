@@ -4,6 +4,10 @@
 # claude
 .claude/
 
+# docker
+.docker/
+.env
+
 # server
 Echo-RestAPI/
 Echo-Web/
