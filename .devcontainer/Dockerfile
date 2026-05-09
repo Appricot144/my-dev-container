@@ -38,6 +38,7 @@ RUN apt-get update && apt-get install -y \
     maven \
     git \
     zsh \
+    rsync \
     sudo \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \

@@ -1,17 +1,81 @@
-// ===================================================
-// WIP: 動確　build:deploy
-// ===================================================
 {
   "version": "2.0.0",
   "tasks": [
+    {
+      "label": "bld & d",
+      "detail": "フルビルド＆デプロイ（初回・依存関係変更時）",
+      "type": "shell",
+      "command": "bash ${workspaceFolder}/.vscode/deploy.sh --full ${input:project}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": "$maven"
+    },
+    {
+      "label": "cmp",
+      "detail": "Javaクラスのみ再コンパイル（Tomcat自動リロード）",
+      "type": "shell",
+      "command": "bash ${workspaceFolder}/.vscode/deploy.sh --java ${input:project}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": "$maven"
+    },
+    {
+      "label": "dpl:static",
+      "detail": "HTML等の静的リソースのみコピー（Echo-Webのみ）",
+      "type": "shell",
+      "command": "bash ${workspaceFolder}/.vscode/deploy.sh --static Echo-Web",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "dpl:vite",
+      "detail": "Viteビルド＋静的リソースコピー（Echo-Webのみ）",
+      "type": "shell",
+      "command": "bash ${workspaceFolder}/.vscode/deploy.sh --vite Echo-Web",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+
+    // old tasks
+
     // ===================================================
-    // Compile: クラスファイルのみ更新（高速）
+    // Deploy Classes: クラスファイルのみ更新
     // ===================================================
     {
       "label": "compile",
       "detail": "クラスファイルのみ再コンパイルして webapps に反映します（静的リソースは対象外）",
       "type": "shell",
-      "command": "mvn compile -f ${input:project}/pom.xml && cp -r ${input:project}/target/classes/* /deploy/echo/rest-api/WEB-INF/classes/",
+      "command": "mvn compile -f ${input:project}/pom.xml && cp -r ${input:project}/target/classes/* ${input:deploy-dir}/WEB-INF/classes/",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -24,13 +88,13 @@
       "problemMatcher": "$maven"
     },
     // ===================================================
-    // Deploy Static: 静的リソースのみコピー（最速）
+    // Deploy Static: 静的リソースのみコピー
     // ===================================================
     {
       "label": "deploy:static",
       "detail": "HTML / JS / CSS など静的リソースのみ webapps に反映します",
       "type": "shell",
-      "command": "rsync -av --exclude='WEB-INF' ${workspaceFolder}/${input:project}/src/main/webapp/ ${workspaceFolder}/deploy/echo/rest-api/",
+      "command": "rsync -av --exclude='WEB-INF' ${workspaceFolder}/${input:project}/src/main/webapp/ ${input:deploy-dir}/",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -49,7 +113,7 @@
       "label": "deploy:clean",
       "detail": "Tomcat の webapps をクリーンします",
       "type": "shell",
-      "command": "rm -rf /deploy/${input:product}/${input:server}/*",
+      "command": "rm -rf ${input:deploy-dir}/*",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -62,7 +126,7 @@
       "problemMatcher": []
     },
     // ===================================================
-    // Build: WAR を作成
+    // Build: WAR を作成              FIXME:
     // ===================================================
     {
       "label": "build",
@@ -72,10 +136,7 @@
       "options": {
         "cwd": "${workspaceFolder}/${input:project}"
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true // Ctrl+Shift+B に割り当て
-      },
+      "group": "none",
       "presentation": {
         "reveal": "always",
         "panel": "shared",
@@ -84,14 +145,14 @@
       "problemMatcher": "$maven"
     },
     // ===================================================
-    // Deploy: WAR を Tomcat の webapps/ にコピー
+    // Deploy: デプロイディレクトリに WAR を展開
     // ===================================================
     {
       "label": "deploy",
-      "detail": "ビルド済みの WAR を Tomcat の webapps/ にコピーします",
+      "detail": "ビルド済みの WAR を展開してwebapps/ にコピーします",
       "type": "shell",
       // TOMCAT_HOME が未設定の場合は /opt/tomcat にフォールバック
-      "command": "cp ${workspaceFolder}/${input:project}/target/${input:project}.war ${workspaceFolder}/deploy/echo/restapi/",
+      "command": "cd ${input:deploy-dir} && jar -xf ${input:project}/target/${input:container}.war",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -105,13 +166,13 @@
     },
 
     // ===================================================
-    // Build & Deploy
+    // Build & Clean Deploy
     // ===================================================
     {
       "label": "build & deploy",
       "detail": "ビルドしてそのまま Tomcat にデプロイします",
-      "dependsOrder": "sequence", // build が終わってから deploy を実行
-      "dependsOn": ["build", "deploy"],
+      "dependsOrder": "sequence",
+      "dependsOn": ["build", "deploy:clean", "deploy"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -121,7 +182,7 @@
       "problemMatcher": []
     },
     // ===================================================
-    // Test: テストを実行 TODO:inputs で選択
+    // Test: テストを実行
     // ===================================================
     {
       "label": "test",
@@ -129,7 +190,7 @@
       "type": "shell",
       "command": "mvn test",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/${input:project}"
       },
       "group": {
         "kind": "test",
@@ -143,13 +204,13 @@
       "problemMatcher": "$maven"
     },
     // ===================================================
-    // Tomcat: ログを流す TODO:inputs で選択
+    // Tomcat: ログを流す
     // ===================================================
     {
       "label": "tomcat:log",
-      "detail": "product-a-1 のログをリアルタイムで表示します",
+      "detail": "tomcatのログをリアルタイムで表示します",
       "type": "shell",
-      "command": "docker compose logs -f product-a-1",
+      "command": "docker compose logs -f ${input:container}",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -236,44 +297,6 @@
         "clear": false
       },
       "problemMatcher": []
-    },
-    // ===================================================
-    // Docker: profile単位で再ビルド
-    // ===================================================
-    {
-      "label": "docker:rebuild:profile",
-      "detail": "指定したprofileのイメージを再ビルドして起動します",
-      "type": "shell",
-      "command": "docker compose --profile ${input:profile} up -d --build",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "none",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": false
-      },
-      "problemMatcher": []
-    },
-    // ===================================================
-    // Docker: コンテナ単体で再ビルド
-    // ===================================================
-    {
-      "label": "docker:rebuild:container",
-      "detail": "指定したコンテナを再ビルドして起動します",
-      "type": "shell",
-      "command": "docker compose up -d --build ${input:container}",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "none",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "clear": false
-      },
-      "problemMatcher": []
     }
   ],
   "inputs": [
@@ -294,6 +317,16 @@
       "type": "pickString",
       "description": "プロジェクトを選択してください",
       "options": ["Echo-RestAPI", "Echo-Web", "Message-Web"]
+    },
+    {
+      "id": "deploy-dir",
+      "type": "pickString",
+      "description": "デプロイディレクトリを選択してください",
+      "options": [
+        { "label": "Echo-RestAPI", "value": "/deploy/echo/rest-api" },
+        { "label": "Echo-Web", "value": "/deploy/echo/web" },
+        { "label": "Message-Web", "value": "/deploy/message/web" }
+      ]
     }
   ]
 }
