@@ -5,6 +5,63 @@
   "version": "2.0.0",
   "tasks": [
     // ===================================================
+    // Compile: クラスファイルのみ更新（高速）
+    // ===================================================
+    {
+      "label": "compile",
+      "detail": "クラスファイルのみ再コンパイルして webapps に反映します（静的リソースは対象外）",
+      "type": "shell",
+      "command": "mvn compile -f ${input:project}/pom.xml && cp -r ${input:project}/target/classes/* /deploy/echo/rest-api/WEB-INF/classes/",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": "$maven"
+    },
+    // ===================================================
+    // Deploy Static: 静的リソースのみコピー（最速）
+    // ===================================================
+    {
+      "label": "deploy:static",
+      "detail": "HTML / JS / CSS など静的リソースのみ webapps に反映します",
+      "type": "shell",
+      "command": "rsync -av --exclude='WEB-INF' ${workspaceFolder}/${input:project}/src/main/webapp/ ${workspaceFolder}/deploy/echo/rest-api/",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
+    // Deploy Clean: webapps をクリーン
+    // ===================================================
+    {
+      "label": "deploy:clean",
+      "detail": "Tomcat の webapps をクリーンします",
+      "type": "shell",
+      "command": "rm -rf /deploy/${input:product}/${input:server}/*",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    // ===================================================
     // Build: WAR を作成
     // ===================================================
     {
@@ -27,7 +84,7 @@
       "problemMatcher": "$maven"
     },
     // ===================================================
-    // Deploy: WAR を Tomcat の webapps/ にコピー 
+    // Deploy: WAR を Tomcat の webapps/ にコピー
     // ===================================================
     {
       "label": "deploy",
@@ -46,6 +103,7 @@
       },
       "problemMatcher": []
     },
+
     // ===================================================
     // Build & Deploy
     // ===================================================
@@ -53,10 +111,7 @@
       "label": "build & deploy",
       "detail": "ビルドしてそのまま Tomcat にデプロイします",
       "dependsOrder": "sequence", // build が終わってから deploy を実行
-      "dependsOn": [
-        "build",
-        "deploy"
-      ],
+      "dependsOn": ["build", "deploy"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -226,30 +281,19 @@
       "id": "profile",
       "type": "pickString",
       "description": "起動するprofileを選択してください",
-      "options": [
-        "echo",
-        "message"
-      ]
+      "options": ["echo", "message"]
     },
     {
       "id": "container",
       "type": "pickString",
       "description": "起動するコンテナを選択してください",
-      "options": [
-        "echo-restapi",
-        "echo-web",
-        "message-web"
-      ]
+      "options": ["echo-restapi", "echo-web", "message-web"]
     },
     {
       "id": "project",
       "type": "pickString",
       "description": "プロジェクトを選択してください",
-      "options": [
-        "Echo-RestAPI",
-        "Echo-Web",
-        "Message-Web"
-      ]
+      "options": ["Echo-RestAPI", "Echo-Web", "Message-Web"]
     }
   ]
 }

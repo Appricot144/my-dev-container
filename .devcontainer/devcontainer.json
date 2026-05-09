@@ -10,9 +10,7 @@
   "onCreateCommand": "echo DEV: started",
   "postAttachCommand": "echo DEV: attached",
   "postStartCommand": "echo DEV: started",
-  "runServices": [
-    "dev"
-  ],
+  "runServices": ["dev"],
   // ----------------------------------------------------
   "customizations": {
     "vscode": {
@@ -32,9 +30,7 @@
         "terminal.integrated.profiles.osx": {
           "zsh": {
             "path": "/bin/zsh",
-            "args": [
-              "-l"
-            ]
+            "args": ["-l"]
           }
         },
         "editor.formatOnSave": true,
@@ -65,16 +61,6 @@
     "MAVEN_OPTS": "-Xmx1024m"
   },
   // コンテナからwindowsへポートを転送
-  "forwardPorts": [
-    8080,
-    5173,
-    3000
-  ],
-  "portsAttributes": {
-    "8080": {
-      "label": "proxy",
-      "onAutoForward": "notify"
-    }
-  },
+  "forwardPorts": [5173, 3000],
   "shutdownAction": "stopCompose"
 }

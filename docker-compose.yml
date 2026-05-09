@@ -30,7 +30,7 @@ services:
       - app-network
 
   # ════════════════════════════════════════════════════════════
-  # echo-server のサーバ群
+  # echo-restapi のサーバ群
   # profile: echo
   # ════════════════════════════════════════════════════════════
   echo-restapi:
@@ -45,9 +45,11 @@ services:
     environment:
       - CATALINA_OPTS=-Xmx512m # サーバごとに調整
     profiles: ["echo"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - echo-restapi-dv:/opt/tomcat/webapps # war deploy volume
-      - ./conf:/opt/tomcat/conf # server conf (server.xml etc...)
+      - echo-restapi-dv:/opt/tomcat/webapps/echo-restapi # war deploy volume
+      - ./Echo-RestAPI/conf:/opt/tomcat/conf # server conf (server.xml etc...)
     networks:
       - app-network
     healthcheck:
@@ -62,9 +64,11 @@ services:
       context: .
       dockerfile: ../dev-env/server-base/Dockerfile
     profiles: ["echo"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - echo-web-dv:/opt/tomcat/webapps
-      - ./conf:/opt/tomcat/conf
+      - echo-web-dv:/opt/tomcat/webapps/echo-web
+      - ./Echo-Web/conf:/opt/tomcat/conf
     networks:
       - app-network
     healthcheck:
@@ -83,8 +87,10 @@ services:
       context: .
       dockerfile: ../dev-env/server-base/Dockerfile
     profiles: ["message"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - message-web-dv:/opt/tomcat/webapps
+      - message-web-dv:/opt/tomcat/webapps/message-web
       - ../Message/Message-Web/conf:/opt/tomcat/conf
     networks:
       - app-network
